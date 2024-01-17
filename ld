@@ -3,9 +3,6 @@
 #   1. dumps symbols for all input object files
 #   2. find functions begin with `__wrap`
 #   3. add --wrap option to linekr
-#
-# Example usage:
-#
 
 LD=riscv64-unknown-elf-ld
 WRAP_OPTION=""
@@ -21,7 +18,10 @@ for arg in $@; do
 done
 
 # Call the real linker with --wrap args appended.
-echo "$LD $@ $WRAP_OPTION"
+echo "Original command:"
+echo "  $@"
+echo "Added --wrap command:"
+echo "  $LD $@ $WRAP_OPTION"
 $LD $@ $WRAP_OPTION
 
 
