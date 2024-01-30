@@ -13,7 +13,7 @@ import re
 from itanium_demangler import parse as demangle
 
 def transfer_sub(matchobj):
-    print(matchobj.group(0))
+    #print(matchobj.group(0))
     return _transfer_sub(matchobj.group(0))
 
 def _transfer_sub(mangled):
@@ -40,17 +40,17 @@ def _transfer_sub(mangled):
     pat = rf'(_Z.+){len_sym}{sym}(E.*)'
     repl = rf'__wrap_\g<1>{len(sym_no_sub)}{sym_no_sub}\g<2>'
     wrapped = re.sub(pat, repl, mangled)
-    print(wrapped)
+    #print(wrapped)
     return wrapped
 
 
 def transfer_super(matchobj):
-    print(matchobj.group(0))
+    #print(matchobj.group(0))
     return _transfer_super(matchobj.group(0))
 
 def _transfer_super(mangled):
     """
-    Transfer C++ mangled symbol with $Super$$ to __wrap_.
+    Transfer C++ mangled symbol with $Super$$ to __real_.
 
     Foo::$Super$$foo()
     >>> transfer_super('_ZN3Foo9$Super$$fooEv')
@@ -72,14 +72,14 @@ def _transfer_super(mangled):
     pat = rf'(_Z.+){len_sym}{sym}(E.*)'
     repl = rf'__real_\g<1>{len(sym_no_sub)}{sym_no_sub}\g<2>'
     wrapped = re.sub(pat, repl, mangled)
-    print(wrapped)
+    #print(wrapped)
     return wrapped
 
 
 def main():
     in_asm_file = sys.argv[1]
     try:
-        out_asm_file = sys.argv[2]
+        out_asm_file = sys.argv[3]
     except IndexError:
         shutil.copyfile(in_asm_file, in_asm_file + '.backup')
         out_asm_file = in_asm_file
@@ -87,30 +87,10 @@ def main():
         asm = f.read();
     asm = re.sub(r'_Z.*?\$Sub\$\$([a-zA-Z0-9_]+)', transfer_sub, asm)
     asm = re.sub(r'_Z.*?\$Super\$\$([a-zA-Z0-9_]+)', transfer_super, asm)
+    print(asm)
     with open(out_asm_file, 'w') as f:
         f.write(asm)
 
-    # mangled = "_ZN9Container11$Sub$$BuildEv"
-    # mangled = "_ZN3Foo9$Sub$$fooEv"
-    # mangled = "_ZN11Container2211$Sub$$BuildEv"
-    # wrapped = transfer_sub(mangled);
-    # print(wrapped)
-    # assert wrapped == "__wrap__ZN9Container5BuildEv"
-
-
-    # ast = demangle('_ZN3Foo9$Sub$$fooEv')
-
-    # print(repr(ast[1]))
-    # print(ast)
-
-    # ast = demangle('_ZN11Container2211$Sub$$BuildEv')
-
-    # print(repr(ast[-2]))
-    # print(repr(ast))
-    # print(ast)
 
 if __name__ == "__main__":
-    print("aa")
     main()
-    # import doctest
-    # doctest.testmod()
