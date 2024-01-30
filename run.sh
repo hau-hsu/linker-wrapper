@@ -1,3 +1,6 @@
-riscv64-unknown-elf-gcc -c lib.c stub.c main.c
-./ld lib.o stub.o main.o -o main
+riscv64-unknown-elf-g++ -S lib.cpp -o lib.s
+./wrap-symbols lib.s -o lib.s
+riscv64-unknown-elf-g++ lib.s -c
+riscv64-unknown-elf-g++ main.cpp -c
+./ld-wrapper lib.o main.o -o main
 
